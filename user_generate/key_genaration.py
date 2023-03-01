@@ -270,10 +270,9 @@ def listed(p,q):
 			count+=1
 			result.append([num,c])
 
-	for i in range(10):
+	for i in range(1):
 		for j in range(2):
 			print(str(result[i][j])+"\n")
-		print("\n")
 def rdnumfile(a):
 	ret =""
 	for i in a:
