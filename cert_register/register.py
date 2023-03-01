@@ -35,7 +35,4 @@ class register(object):
         b = b_0 + msg
         return b
 
-'''
-register = cert(b'12345')
-print(register.encrypt(b'12345'))'''
 
