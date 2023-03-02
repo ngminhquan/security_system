@@ -1,5 +1,3 @@
-from cert_verify import verify
-verify.abc()
 
 '''
 def compmod(a,b,n):	#Tinh a^b mod n

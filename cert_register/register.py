@@ -1,3 +1,4 @@
+'''
 import struct
 import binascii
 import sha256
@@ -37,6 +38,15 @@ class register(object):
      
         b = b_0 + self._msg
         return b
-    
-def ab(s):
-    return s
+'''    
+#from security_system.cert_verify.verify import abc
+
+#print(abc())
+'''
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+'''
+import sys
+print(sys.path)
+sys.path.append('d:\\SIPLab\\security_system\\cert_register')
