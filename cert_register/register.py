@@ -1,6 +1,7 @@
 import struct
 import binascii
-import sha256, rsa_sc
+import sha256
+import rsa_algorithm as rsa
 
 class register(object):
     def __init__(self, nonce) -> None:
@@ -8,7 +9,7 @@ class register(object):
 
     #RSA encrypt, using PK
     def rsa_encrypt(self, text: bytes, key: bytes) -> bytes:
-        ciphertext = rsa_sc.encrypt(text, key)
+        ciphertext = rsa.encrypt(text, key)
         return ciphertext
 
     #sent message
@@ -17,22 +18,25 @@ class register(object):
         self._msg_len: int = len(message)
        
         payload = self.plaintext_gen(self._msg)
-        digest = sha256.hash_function(payload)
-        signature = self.rsa_encrypt(digest)
+
+        #payload -> digest 256bit -> encrypt RSA
+        digest = sha256.hash_function(payload)      
+        signature = self.rsa_encrypt(digest) 
+
         cp = payload + signature
         return cp
    
 
 
-    def plaintext_gen(self, msg: bytes) -> bytes:
+    def plaintext_gen(self) -> bytes:
         # Formatting control information and nonce
         self.q:int = 15 - len(self._nonce)  # length of Q, the encoded message length
 
         flags: int = self.q - 1
-        b_0: bytes = struct.pack("B", flags) + self._nonce + sha256.long_to_bytes(len(msg), self.q)
-
-       
-        b = b_0 + msg
+        b_0: bytes = struct.pack("B", flags) + self._nonce + sha256.long_to_bytes(len(self._msg), self.q)
+     
+        b = b_0 + self._msg
         return b
-
-
+    
+def ab(s):
+    return s
