@@ -1,5 +1,5 @@
 import random
-
+import id_generate
 def miller_rabin(n, a): # odd number only
 #find k and q
     q = n-1	
@@ -269,10 +269,8 @@ def listed(p,q):
 				c+=phi
 			count+=1
 			result.append([num,c])
+	return result[0][0],result[0][1]
 
-	for i in range(1):
-		for j in range(2):
-			print(str(result[i][j])+"\n")
 def rdnumfile(a):
 	ret =""
 	for i in a:
@@ -285,5 +283,11 @@ def rdnumfile(a):
 x, y = 0, 0
 x = rdnumfile(p)
 y = rdnumfile(q)
-
-listed(x,y)
+with open('id_output.txt','w',encoding='UTF-8') as id_output, open('p_q.txt','w',encoding='UTF-8') as p_q_data, open('key_output.txt','w',encoding = 'UTF-8') as generate_key:
+      public_key,private_key = listed(x,y)
+      p_q_data.write(p+'\n')
+      p_q_data.write(q)
+      generate_key.write(str(public_key)+'\n')
+      generate_key.write(str(private_key))
+      #otp = id_generate.id_user(image_path)
+      #id_output.write(otp)
