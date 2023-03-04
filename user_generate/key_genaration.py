@@ -219,6 +219,7 @@ while(1):
         break
     else:
         continue
+
 print(primetest(y))
 
 p = str(hex(i))
@@ -228,6 +229,15 @@ q = str(hex(y))
 
 print("Done!")
 
+#Doc tu string 1 so hex
+def rdnum16(a):
+    ret =""
+    for i in a: #Tao string chua cac ki tu so
+        if (i.isalnum()):
+            ret+=i
+        else:
+            break
+    return int(ret,16)
 
 #Tìm 2 cặp khóa publickey and privatekey
 def euclid(a, b):
@@ -252,7 +262,7 @@ def euclid(a, b):
 		t2 = t 
 	return r1, s1, t1
 
-def listed(p,q):
+def listed(p:int,q: int):
 	n = q* p
 	phi = (p-1)*(q-1)
 	result = []
@@ -269,7 +279,9 @@ def listed(p,q):
 				c+=phi
 			count+=1
 			result.append([num,c])
-	return result[0][0],result[0][1]
+                        
+                        
+	return result
 
 def rdnumfile(a):
 	ret =""
@@ -279,15 +291,21 @@ def rdnumfile(a):
 		else:
 			break
 	return int(ret,16)
+
 # Bat dau chuong trinh
 x, y = 0, 0
 x = rdnumfile(p)
 y = rdnumfile(q)
 with open('id_output.txt','w',encoding='UTF-8') as id_output, open('p_q.txt','w',encoding='UTF-8') as p_q_data, open('key_output.txt','w',encoding = 'UTF-8') as generate_key:
-      public_key,private_key = listed(x,y)
       p_q_data.write(p+'\n')
       p_q_data.write(q)
-      generate_key.write(str(public_key)+'\n')
-      generate_key.write(str(private_key))
+      result = listed(x, y)
+      for i in range(10):
+        for j in range(2):
+            generate_key.write(str(result[i][j])+"\n")
+        generate_key.write("\n")
       #otp = id_generate.id_user(image_path)
       #id_output.write(otp)
+      
+
+
