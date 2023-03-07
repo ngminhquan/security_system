@@ -17,6 +17,15 @@ def rdnum10(a):
             break
     return int(ret)
 
+#Ma hoa
+def encrypt(mes, key, n):
+    ciphertext = pow(mes, key, n)
+    return ciphertext
+#Giai ma
+def decrypt(cp, key, n):
+    plaintext = pow(cp, key, n)
+    return plaintext
+
 '''
 # Lay cap q, p
 with open ("p_q.txt", "r") as f:
@@ -35,16 +44,6 @@ m = 123456
 '''
 
 
-#Ma hoa
-def encrypt(mes, key, n):
-    ciphertext = pow(mes, key, n)
-    return ciphertext
-#Giai ma
-def decrypt(cp, key, n):
-    plaintext = pow(cp, key, n)
-    return plaintext
-
-
 '''
 # Bat dau ma hoa
 encr = pow(m,e,n)
@@ -56,6 +55,7 @@ pt = str(hex(decr))
 print('encrypt: ',encr)
 print('decrypt: ', decr)
 '''
+
 '''
 import gmpy2
 
