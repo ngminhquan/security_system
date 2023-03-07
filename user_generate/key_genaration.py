@@ -292,20 +292,37 @@ def rdnumfile(a):
 			break
 	return int(ret,16)
 
+def rdnum10(a):
+    ret =""
+    for i in a:
+        if (i.isnumeric()):
+            ret+=i
+        else:
+            break
+    return int(ret)
+
 # Bat dau chuong trinh
 x, y = 0, 0
 x = rdnumfile(p)
 y = rdnumfile(q)
 with open('id_output.txt','w',encoding='UTF-8') as id_output, open('p_q.txt','w',encoding='UTF-8') as p_q_data, open('key_output.txt','w',encoding = 'UTF-8') as generate_key:
-      p_q_data.write(p+'\n')
-      p_q_data.write(q)
-      result = listed(x, y)
-      for i in range(10):
+    p_q_data.write(p+'\n')
+    p_q_data.write(q)
+    result = listed(x, y)
+    for i in range(10):
         for j in range(2):
             generate_key.write(str(result[i][j])+"\n")
         generate_key.write("\n")
-      #otp = id_generate.id_user(image_path)
-      #id_output.write(otp)
+    #
+    image_path = 'lena_img.jpg'
+    otp = id_generate.id_user(image_path)
+    id_output.write(otp)
+with open('key_output.txt','r',encoding='UTF-8') as mid_acessing :
+    e = rdnum10(mid_acessing.readline())
+    d = rdnum10(mid_acessing.readline())
+with open('key_output.txt','w',encoding='UTF-8') as final_gen_key :
+    final_gen_key.write(str(e)+'\n'+ str(d))
+
       
 
 
