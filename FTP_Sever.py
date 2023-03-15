@@ -4,7 +4,7 @@ from pydrive2.drive import GoogleDrive
 gauth = GoogleAuth()
 gauth.LocalWebserverAuth() 
 drive = GoogleDrive(gauth)
-"""
+
 user_file  =  input("Nhap ten nguoi dung : ")
 #tao mot nguoi dung moi
 def create_folder(parent_folder_id):
@@ -12,7 +12,7 @@ def create_folder(parent_folder_id):
   newFolder.Upload()
   return newFolder
 create_folder(user_file)
-#tao key va id cho nguoi dung
+#tao cert va private key
 def upload_file(title_drive_folder,file_name):
   file_list = drive.ListFile({'q': "title='%s' and mimeType='application/vnd.google-apps.folder' and trashed=false" % title_drive_folder}).GetList()
   parent_folder = file_list[0]
@@ -26,13 +26,22 @@ def upload_file(title_drive_folder,file_name):
     file.SetContentString(upload_file.read())
   file.Upload()
   return file
-id = 'id_output.txt'
-key = 'key_output.txt'
-upload_file(user_file,id)
-upload_file(user_file,key)
-"""
+with open('cert_&_key.txt','w',encoding='UTF-8') as cp, open('key_output.txt','r',encoding = 'UTF-8') as key,open('cert.txt','r',encoding='utf-8') as cert:
+  key_data = key.read()
+  cert_data = cert.read()
+  private_key =''
+  for value in key_data:
+    private_key += value
+    if value == '\n':
+      break
+  cp.write(str(cert_data) +'\n'+ str(private_key))
+
+file_up = 'cert_&_key.txt'
+upload_file(user_file,file_up)
+
+
 # lay cap khoa va id cua user dc yeu cau :
-wanted_user = input("nhap ten nguoi dung muon truy cap : ")
+"""wanted_user = input("nhap ten nguoi dung muon truy cap : ")
 id = 'id_output.txt'
 key = 'key_output.txt'
 def download_file_content(title_drive_folder,file_name):
@@ -52,4 +61,4 @@ def download_file_content(title_drive_folder,file_name):
 get_id = download_file_content(wanted_user,id)
 get_key = download_file_content(wanted_user,key)
 print(get_id)
-print(get_key)
+print(get_key)"""

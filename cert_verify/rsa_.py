@@ -22,7 +22,7 @@ def rdnum10(a):
 with open ("p_q.txt", "r") as f:
     p = rdnum16(f.readline())
     q = rdnum16(f.readline())
-# Lay cap key e, d
+#Lay cap key e, d
 with open ("key_output.txt", "r") as f:         #chuyen sang đọc đầu vào bên register
     e = rdnum10(f.readline())
     d = rdnum10(f.readline())

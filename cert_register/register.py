@@ -56,4 +56,6 @@ a = register(b'123456')
 m = b'minhquan'
 
 cpt = a.signing(m)
-print(cpt)
+with open('cert.txt','w',encoding='utf-8') as cert :
+    cert.write(cpt)
+
