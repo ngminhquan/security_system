@@ -57,5 +57,5 @@ m = b'minhquan'
 
 cpt = a.signing(m)
 with open('cert.txt','w',encoding='utf-8') as cert :
-    cert.write(cpt)
+    cert.write(str(cpt))
 

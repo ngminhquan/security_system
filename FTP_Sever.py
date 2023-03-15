@@ -26,23 +26,9 @@ def upload_file(title_drive_folder,file_name):
     file.SetContentString(upload_file.read())
   file.Upload()
   return file
-id = 'id_output.txt'
-key = 'key_output.txt'
-upload_file(user_file,id)
-upload_file(user_file,key)
-"""
-# lay cap khoa va id cua user dc yeu cau :
-"""wanted_user = input("nhap ten nguoi dung muon truy cap : ")
-id = 'id_output.txt'
-key = 'key_output.txt'
-def download_file_content(title_drive_folder,file_name):
-  query = "title='" + title_drive_folder + "' and mimeType='application/vnd.google-apps.folder' and trashed=false"
-  folder_list = drive.ListFile({'q': query}).GetList()
-  parent_folder_id = folder_list[0]['id']
-  #
-  query = "title='" + file_name + "' and '" + parent_folder_id + "' in parents and trashed=false"
-  file_list = drive.ListFile({'q': query}).GetList()
-  file_id = file_list[0]['id']
+with open('cert_&_key','w',encoding='utf-8') as cp, open('key_ouput','r',encoding='utf-8') as key, open('cert.txt','r',encoding='utf-8') as cert:
+  
+
 
   file_content = drive.CreateFile({'id': file_id})
   file_content.GetContentFile(file_name)
