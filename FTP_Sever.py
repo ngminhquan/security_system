@@ -26,20 +26,11 @@ def upload_file(title_drive_folder,file_name):
     file.SetContentString(upload_file.read())
   file.Upload()
   return file
-with open('cert_&_key.txt','w',encoding='UTF-8') as cp, open('key_output.txt','r',encoding = 'UTF-8') as key,open('cert.txt','r',encoding='utf-8') as cert:
-  key_data = key.read()
-  cert_data = cert.read()
-  private_key =''
-  for value in key_data:
-    private_key += value
-    if value == '\n':
-      break
-  cp.write(str(cert_data) +'\n'+ str(private_key))
-
-file_up = 'cert_&_key.txt'
-upload_file(user_file,file_up)
-
-
+id = 'id_output.txt'
+key = 'key_output.txt'
+upload_file(user_file,id)
+upload_file(user_file,key)
+"""
 # lay cap khoa va id cua user dc yeu cau :
 """wanted_user = input("nhap ten nguoi dung muon truy cap : ")
 id = 'id_output.txt'
