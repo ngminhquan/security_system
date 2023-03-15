@@ -4,7 +4,7 @@ from pydrive2.drive import GoogleDrive
 gauth = GoogleAuth()
 gauth.LocalWebserverAuth() 
 drive = GoogleDrive(gauth)
-"""
+
 user_file  =  input("Nhap ten nguoi dung : ")
 #tao mot nguoi dung moi
 def create_folder(parent_folder_id):
@@ -30,7 +30,7 @@ id = 'id_output.txt'
 key = 'key_output.txt'
 upload_file(user_file,id)
 upload_file(user_file,key)
-"""
+
 # lay cap khoa va id cua user dc yeu cau :
 wanted_user = input("nhap ten nguoi dung muon truy cap : ")
 id = 'id_output.txt'
