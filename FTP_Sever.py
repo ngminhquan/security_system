@@ -38,4 +38,4 @@ with open('cert_&_key','w',encoding='utf-8') as cp, open('key_ouput','r',encodin
 get_id = download_file_content(wanted_user,id)
 get_key = download_file_content(wanted_user,key)
 print(get_id)
-print(get_key)"""
+print(get_key)
