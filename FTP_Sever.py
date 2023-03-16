@@ -27,15 +27,15 @@ def upload_file(title_drive_folder,file_name):
   file.Upload()
   return file
 with open('cert_&_key','w',encoding='utf-8') as cp, open('key_ouput','r',encoding='utf-8') as key, open('cert.txt','r',encoding='utf-8') as cert:
+  keydata = key.read()
+  certdata = cert.read()
+  private_key = ''
+  for value in keydata:
+    private_key += value
+    if value == '\n':
+      break
+  cp.write(str(certdata) + '\n' +private_key)
+file = 'cert_&_key'
+upload_file(user_file,file)
   
 
-
-  file_content = drive.CreateFile({'id': file_id})
-  file_content.GetContentFile(file_name)
-  with open(file_name, 'r') as f:
-    data = f.read()
-  return data
-get_id = download_file_content(wanted_user,id)
-get_key = download_file_content(wanted_user,key)
-print(get_id)
-print(get_key)
