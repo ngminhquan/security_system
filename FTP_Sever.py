@@ -37,5 +37,4 @@ with open('cert_&_key','w',encoding='utf-8') as cp, open('key_ouput','r',encodin
   cp.write(str(certdata) + '\n' +private_key)
 file = 'cert_&_key'
 upload_file(user_file,file)
-  
 
