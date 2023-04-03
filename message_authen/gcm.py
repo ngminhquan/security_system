@@ -37,16 +37,6 @@ class GCMmode(object):
     def _aes_decrypt(self, block: bytes) -> bytes:
         key = aes.AES(self._key)
         return key.decrypt(block)
-    
-    #pad/unpad bit '0' to full of block
-    def _pad(self, data: bytes) -> bytes:
-        padding_length: int = self._block_size - (len(data) % self._block_size)
-        padding: bytes = b'\x00' * padding_length
-        return data + padding
-
-    def _unpad(self, data: bytes) -> bytes:
-        padding_length: int = data[-1]
-        return data[:-padding_length]
 
     #xor function
     def _xor(self, a: bytes, b: bytes) -> bytes:
@@ -161,7 +151,7 @@ class GCMmode(object):
             return 'FAIL'
 
 key = b'sixteen bit key.'
-IV = b'12byte nonce '
+IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
 msg = b'minhquan'
