@@ -302,18 +302,5 @@ def _copy_bytes(start, end, seq):
 mkey = b'sixteen byte key'
 pt = b'sixteen byte plt'
 
-
-
-
-#mkey = 0x2b7e151628aed2a6abf7158809cf4f3c
-#pt = 0x3243f6a8885a308d313198a2e0370734
-print('true pt:', pt)
-
-
 key = AES(mkey)
-cp = key.encrypt(pt)
-print('encr cp:',cp)
-
-plt = key.decrypt(cp)
-print('decr pt:',plt)
 '''
