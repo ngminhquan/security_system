@@ -85,10 +85,10 @@ class GCMmode(object):
         cipher = b''
         for i in range(0, n - 1):
             cp = self._aes_encrypt(cb)
-            y = self._xor(x[i: 16*i], cp)        
+            y = self._xor(x[16 * i: 16 * i + 16], cp)   
             cb = self. incre_func(cb, 32)
             cipher += y
-        cp = self._aes_encrypt(cb)[:len(x)-16*(n-1)]
+        cp = self._aes_encrypt(cb[:len(x)-16*(n-1)])
         y_ = self._xor(x[16*(n-1):], cp)
         cipher += y_
         return cipher
@@ -149,12 +149,12 @@ class GCMmode(object):
             return plaintext
         else:
             return 'FAIL'
-
+'''
 key = b'sixteen bit key.'
 IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
-msg = b'minhquanminhquanm'
+msg = b'minhquan iot k65 dai hoc bach khoa ha noi minhquan iot k65 dai hoc bach khoa ha noi minhquan iot k65 dai hoc bach khoa ha noi'
 
 gcm = GCMmode(key, IV, A, tag_len)
 
@@ -162,8 +162,8 @@ cptext, tag = gcm.encrypt_gcm(msg)
 print('cp: ', cptext)
 pt = gcm.decrypt_gcm(cptext, tag)
 print('pt: ', pt)
-
 '''
+
 key = b'sixteen bit key.'
 IV = b'12byte nonce'
 A = b'hello'
@@ -172,13 +172,13 @@ tag_len = 16
 from PIL import Image
 img = Image.open('lena_img.jpg')
 msg = img.tobytes()
-msg = b'asfnenfiwefienfinefineifnief'
+#msg = b'asfnenfiwefienfinefineifnief'
 gcm = GCMmode(key, IV, A, tag_len)
 
 cptext, tag = gcm.encrypt_gcm(msg)
 print(cptext)
-print(len(msg), len(cptext))
-'''
+#print(len(msg), len(cptext))
+
 
 
 

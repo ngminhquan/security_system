@@ -79,9 +79,6 @@ class CCMmode(object):
         #CTR cipher
         s: bytes = self.ctr_gen(math.ceil(len(msg) / 16) + 16)
         _s: bytes = s[self._block_size:]
-        print(self._msg_len)
-        #print(len(_s[:self._msg_len]))
-        print(len(_s))
 
         cp: bytes = self._xor(msg, _s[:self._msg_len]) + self._xor(_tag, (s[:self._block_size])[:self._mac_len])
         return cp       
@@ -159,8 +156,9 @@ img = Image.open('lena_img.jpg')
 msg = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
 cp = ccm.encrypt(msg)
-#print(cp)
+print(cp)
+print(ccm.verify(cp))
+
 print(len(msg), len(cp))
 
-#print(ccm.verify(cp))
 
