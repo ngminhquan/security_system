@@ -85,7 +85,7 @@ class GCMmode(object):
         cipher = b''
         for i in range(0, n - 1):
             cp = self._aes_encrypt(cb)
-            y = self._xor(x[i, 16*i], cp)        
+            y = self._xor(x[i: 16*i], cp)        
             cb = self. incre_func(cb, 32)
             cipher += y
         cp = self._aes_encrypt(cb)[:len(x)-16*(n-1)]
@@ -154,7 +154,7 @@ key = b'sixteen bit key.'
 IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
-msg = b'minhquan'
+msg = b'minhquanminhquanm'
 
 gcm = GCMmode(key, IV, A, tag_len)
 
@@ -163,7 +163,22 @@ print('cp: ', cptext)
 pt = gcm.decrypt_gcm(cptext, tag)
 print('pt: ', pt)
 
+'''
+key = b'sixteen bit key.'
+IV = b'12byte nonce'
+A = b'hello'
+tag_len = 16
+#msg = b''
+from PIL import Image
+img = Image.open('lena_img.jpg')
+msg = img.tobytes()
+msg = b'asfnenfiwefienfinefineifnief'
+gcm = GCMmode(key, IV, A, tag_len)
 
+cptext, tag = gcm.encrypt_gcm(msg)
+print(cptext)
+print(len(msg), len(cptext))
+'''
 
 
 

@@ -2,7 +2,8 @@
 from aes import AES, long_to_bytes, bytes_to_long, _copy_bytes
 from binascii import hexlify, unhexlify
 import struct
-
+from PIL import Image
+import math
 class CCMmode(object):
     def __init__(self, key, nonce, assoc, mac_len) -> None:
         self._block_size: int = 16
@@ -59,7 +60,8 @@ class CCMmode(object):
     def ctr_gen(self, count: int) -> bytes:
         s: bytes = b''
         #generate CTR and encrypt ctr
-        for i in range(int(count) + 2):
+        for i in range(count + 1):
+            
             ctr_i: bytes = struct.pack('B', self.q - 1) + self._nonce + long_to_bytes(i, self.q)
             s_i: bytes = self._aes_encrypt(ctr_i)
             s += s_i
@@ -73,12 +75,15 @@ class CCMmode(object):
         
         #generate tag of the msg
         _tag: bytes = self.mac_gen(self._msg)
-
+        print(_tag, len(_tag))
         #CTR cipher
-        s: bytes = self.ctr_gen(len(msg) // 16)
-        S: bytes = s[self._block_size:]
+        s: bytes = self.ctr_gen(math.ceil(len(msg) / 16) + 16)
+        _s: bytes = s[self._block_size:]
+        print(self._msg_len)
+        #print(len(_s[:self._msg_len]))
+        print(len(_s))
 
-        cp: bytes = self._xor(msg, S[:self._msg_len]) + self._xor(_tag, (s[:self._block_size])[:self._mac_len])
+        cp: bytes = self._xor(msg, _s[:self._msg_len]) + self._xor(_tag, (s[:self._block_size])[:self._mac_len])
         return cp       
     
     def verify(self, ciphertext: bytes) -> bytes:
@@ -90,7 +95,7 @@ class CCMmode(object):
             raise ValueError('mac length is not greater than cipher length')
 
         #CTR cipher
-        s: bytes = self.ctr_gen((self._len_cp - self._mac_len) // 16)
+        s: bytes = self.ctr_gen(math.ceil((self._len_cp - self._mac_len) / 16) +16)
         S = s[self._block_size:]
 
         #received plaintext
@@ -102,7 +107,7 @@ class CCMmode(object):
         if self._t != _tag:
             raise ValueError('tag after generate is not equal to initial tag')
         else:
-            return pt
+            return pt, 'valid'
 
 
 
@@ -143,20 +148,19 @@ class CCMmode(object):
 
 
 
-'''
+
 #test_vector
 key = unhexlify('404142434445464748494a4b4c4d4e4f')
 nonce = unhexlify('101112131415161718191a1b')
 mac_len = 16
 assoc = unhexlify('000102030405060708090a0b0c0d0e0f10111213')
-msg = b'nguyen minh quan'
-
+#msg = b''
+img = Image.open('lena_img.jpg')
+msg = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
 cp = ccm.encrypt(msg)
+#print(cp)
+print(len(msg), len(cp))
 
+#print(ccm.verify(cp))
 
-pt = ccm.verify(cp)
-print(pt, len(pt))
-
-#print(hexlify(cp))
-'''
