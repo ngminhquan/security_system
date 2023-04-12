@@ -75,9 +75,8 @@ class CCMmode(object):
         
         #generate tag of the msg
         _tag: bytes = self.mac_gen(self._msg)
-        print(_tag, len(_tag))
         #CTR cipher
-        s: bytes = self.ctr_gen(math.ceil(len(msg) / 16) + 16)
+        s: bytes = self.ctr_gen(math.ceil(len(msg) / 16))
         _s: bytes = s[self._block_size:]
 
         cp: bytes = self._xor(msg, _s[:self._msg_len]) + self._xor(_tag, (s[:self._block_size])[:self._mac_len])
@@ -147,7 +146,83 @@ class CCMmode(object):
 
 
 #test_vector
+'''
+key1 = unhexlify('404142434445464748494a4b4c4d4e4f')
+key2 = unhexlify('414142434445464748494a4b4c4d4e4f')
+
+nonce = unhexlify('101112131415161718191a1b')
+mac_len = 16
+assoc = unhexlify('000102030405060708090a0b0c0d0e0f10111213')
+#msg = b''
+img = Image.open('lena_img.jpg')
+msg1 = img.tobytes()
+msg2 = bytearray(msg1)
+msg2[-1] += 1
+msg2 = bytes(msg2)
+ccm1 = CCMmode(key1, nonce, assoc, mac_len)
+cp1 = ccm1.encrypt(msg1)
+cp2 = ccm1.encrypt(msg2)
+index1 = []
+index1_u =[]
+cp1 = bin(bytes_to_long(cp1))[2:]
+for i in range(0,len(cp1),8):
+    index1.append(cp1[i:i+8])
+for i in index1:
+    index1_u.append(int(i,2))
+cp2 = bin(bytes_to_long(cp2))[2:]
+index2 = []
+index2_u =[]
+for i in range(0,len(cp2),8):
+    index2.append(cp2[i:i+8])
+for i in index2:
+    index2_u.append(int(i,2))
+s = 0
+s_u = 0
+for i in range(len(index1)) :
+    if index1[i]!= index2[i]:
+        s+=1
+for i in range(len(index1_u)):
+    s_u += abs(index1_u[i] - index2_u[i])
+print(s_u/(255*len(index1_u)))
+#print(s/len(index1))
+'''
+
+
+"""
+ccm1 = CCMmode(key1, nonce, assoc, mac_len)
+cp1 = ccm1.encrypt(msg)
+ccm2 = CCMmode(key2, nonce, assoc, mac_len)
+cp2 = ccm2.encrypt(msg)
+cp1 = bin(bytes_to_long(cp1))[2:]
+index1 = []
+index1_u =[]
+for i in range(0,len(cp1),8):
+    index1.append(cp1[i:i+8])
+for i in index1:
+    index1_u.append(int(i,2))
+cp2 = bin(bytes_to_long(cp2))[2:]
+index2 = []
+index2_u =[]
+for i in range(0,len(cp2),8):
+    index2.append(cp2[i:i+8])
+for i in index2:
+    index2_u.append(int(i,2))
+s = 0
+s_u = 0
+for i in range(len(index1)) :
+    if index1[i]!= index2[i]:
+        s+=1
+for i in range(len(index1_u)):
+    s_u += abs(index1_u[i] - index2_u[i])
+#print(s/len(index1))
+
+print(s_u/(255*len(index1_u)))
+"""
+
+
+'''
 key = unhexlify('404142434445464748494a4b4c4d4e4f')
+
 nonce = unhexlify('101112131415161718191a1b')
 mac_len = 16
 assoc = unhexlify('000102030405060708090a0b0c0d0e0f10111213')
@@ -156,9 +231,5 @@ img = Image.open('lena_img.jpg')
 msg = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
 cp = ccm.encrypt(msg)
-print(cp)
-print(ccm.verify(cp))
-
 print(len(msg), len(cp))
-
-
+'''

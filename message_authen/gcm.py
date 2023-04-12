@@ -2,6 +2,8 @@ import aes
 import struct
 import binascii
 import math
+from PIL import Image
+
 
 
 #input data
@@ -83,12 +85,12 @@ class GCMmode(object):
         n = math.ceil(len(x)/16)
         cb = icb
         cipher = b''
-        for i in range(0, n - 1):
+        for i in range(0, n-1):
             cp = self._aes_encrypt(cb)
-            y = self._xor(x[16 * i: 16 * i + 16], cp)   
+            y = self._xor(x[16 * i: 16 * i + 16], cp) 
             cb = self. incre_func(cb, 32)
             cipher += y
-        cp = self._aes_encrypt(cb[:len(x)-16*(n-1)])
+        cp = (self._aes_encrypt(cb))[:len(x) - 16*(n-1)]
         y_ = self._xor(x[16*(n-1):], cp)
         cipher += y_
         return cipher
@@ -99,13 +101,13 @@ class GCMmode(object):
 
         #define block J0
         if len(self._IV) == 12:
-            j0 = self._IV + b'\x00'*3+b'\x00\x01'
+            j0 = self._IV + b'\x00'*3+b'\x01'
         else:
             s = 16 * math.ceil(len(self._IV)/16) - len(self._IV)
             j0 = self.ghash_func(self._IV + b'\x00'*(s + 8) + aes.long_to_bytes(len(self._IV), 8), _hash)
 
         # #mã hóa plaintexts
-        cipher = self.GCTR(self.incre_func(j0, 32), P)
+        cipher = self.GCTR(j0, P)
 
         #define u and v: lưu độ dài của C: ciphertext và A: additional authen data
         u = 16 * math.ceil(len(cipher)/16) - len(cipher)
@@ -126,7 +128,7 @@ class GCMmode(object):
         
         #define block j0
         if len(self._IV) == 12:
-            j0 = self._IV + b'\x00'*3+b'\x00\x01'
+            j0 = self._IV + b'\x00'*3+b'\x01'
         else:
             s = 16 * math.ceil(len(self._IV)/16) - len(self._IV)
             j0 = self.ghash_func(self._IV + b'\x00'*(s + 8) + aes.long_to_bytes(len(self._IV), 8), _hash)
@@ -149,6 +151,8 @@ class GCMmode(object):
             return plaintext
         else:
             return 'FAIL'
+        
+#test vector
 '''
 key = b'sixteen bit key.'
 IV = b'12byte nonce'
@@ -169,17 +173,10 @@ IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
 #msg = b''
-from PIL import Image
 img = Image.open('lena_img.jpg')
 msg = img.tobytes()
-#msg = b'asfnenfiwefienfinefineifnief'
 gcm = GCMmode(key, IV, A, tag_len)
 
 cptext, tag = gcm.encrypt_gcm(msg)
-print(cptext)
-#print(len(msg), len(cptext))
-
-
-
-
-
+#print(cptext)
+print(len(msg), len(cptext))

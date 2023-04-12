@@ -111,7 +111,7 @@ class AES:
         self.__shift_rows(self.pt)
         self.__add_round_key(self.pt, self.round_keys[40:])
 
-        return long_to_bytes(matrix2text(self.pt))
+        return long_to_bytes(matrix2text(self.pt), 16)
 
     def decrypt(self, ciphertext):
         ciphertext = bytes_to_long(ciphertext)
@@ -126,7 +126,7 @@ class AES:
 
         self.__add_round_key(self.cp, self.round_keys[:4])
 
-        return long_to_bytes(matrix2text(self.cp))
+        return long_to_bytes(matrix2text(self.cp), 16)
 
     def __add_round_key(self, s, k):
         for i in range(4):
