@@ -134,7 +134,7 @@ class GCMmode(object):
             j0 = self.ghash_func(self._IV + b'\x00'*(s + 8) + aes.long_to_bytes(len(self._IV), 8), _hash)
         
         #find plaintext
-        plaintext = self.GCTR(self.incre_func(j0, 32), cp)
+        plaintext = self.GCTR(j0, cp)
 
         #define u and v: lưu độ dài của C: ciphertext và A: additional authen data
         u = 16 * math.ceil(len(cp)/16) - len(cp)
@@ -145,8 +145,6 @@ class GCMmode(object):
         s = self.ghash_func(A_gen, _hash)
 
         tag_new = self.GCTR(j0, s)[:self._tag_len]
-        print('new: ', tag_new)
-        print('old: ', tag)
         if tag_new == tag:
             return plaintext
         else:
@@ -175,8 +173,10 @@ tag_len = 16
 #msg = b''
 img = Image.open('lena_img.jpg')
 msg = img.tobytes()
+msg = b'minhquan'
 gcm = GCMmode(key, IV, A, tag_len)
 
 cptext, tag = gcm.encrypt_gcm(msg)
-#print(cptext)
-print(len(msg), len(cptext))
+print(cptext, len(cptext))
+plain = gcm.decrypt_gcm(cptext, tag)
+print('plain: ', plain, len(plain))
