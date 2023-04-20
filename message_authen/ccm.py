@@ -146,7 +146,7 @@ class CCMmode(object):
 
 
 #test_vector
-'''
+"""
 key1 = unhexlify('404142434445464748494a4b4c4d4e4f')
 key2 = unhexlify('414142434445464748494a4b4c4d4e4f')
 
@@ -154,7 +154,7 @@ nonce = unhexlify('101112131415161718191a1b')
 mac_len = 16
 assoc = unhexlify('000102030405060708090a0b0c0d0e0f10111213')
 #msg = b''
-img = Image.open('lena_img.jpg')
+img = Image.open('D:\SIP_LAP_Project\Security_System\security_system\lena_img.jpg')
 msg1 = img.tobytes()
 msg2 = bytearray(msg1)
 msg2[-1] += 1
@@ -176,16 +176,16 @@ for i in range(0,len(cp2),8):
     index2.append(cp2[i:i+8])
 for i in index2:
     index2_u.append(int(i,2))
-s = 0
 s_u = 0
-for i in range(len(index1)) :
-    if index1[i]!= index2[i]:
-        s+=1
 for i in range(len(index1_u)):
     s_u += abs(index1_u[i] - index2_u[i])
 print(s_u/(255*len(index1_u)))
+print(s_u)
+print(len(index1))
+print(cp1)
 #print(s/len(index1))
-'''
+"""
+
 
 
 """
@@ -220,16 +220,47 @@ print(s_u/(255*len(index1_u)))
 """
 
 
-'''
+
 key = unhexlify('404142434445464748494a4b4c4d4e4f')
 
 nonce = unhexlify('101112131415161718191a1b')
 mac_len = 16
 assoc = unhexlify('000102030405060708090a0b0c0d0e0f10111213')
 #msg = b''
-img = Image.open('lena_img.jpg')
-msg = img.tobytes()
+img = Image.open('non_Dicom_image.jpg')
+msg1 = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
-cp = ccm.encrypt(msg)
-print(len(msg), len(cp))
-'''
+cp1 = bytearray(ccm.encrypt(msg1))
+msg2 = bytearray(msg1)
+msg2[-1] += 1
+msg2 = bytes(msg2)
+cp2  = bytearray(ccm.encrypt(msg2))
+cp1_u =[]
+for i in cp1 :
+    cp1_u.append(bin(i)[2:])
+cp2_u=[]
+for j in cp2 :
+    cp2_u.append(bin(j)[2:])
+t = 0
+for i in range(len(cp1_u)):
+    if cp1_u[i] == cp2_u[i]:
+        t += 1
+
+    else :
+        t+= 0
+print(t/len(cp1_u))
+s = 0
+print(cp1 == cp2)
+for i in range(10):
+    print(cp1[i],cp2[i])
+    
+    #s+= abs(cp1[i] - cp2[i])/255 
+#print(s)
+"""
+pt, _ = ccm.verify(cp)
+
+img_copy = Image.frombytes(img.mode, img.size, pt)
+
+# Save the copy to a new file
+img_copy.save('image_copy.jpg')
+"""

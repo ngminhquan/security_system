@@ -118,7 +118,7 @@ class GCMmode(object):
         s = self.ghash_func(A_gen, _hash)
         #tag of the plaintext
         tag = self.GCTR(j0, s)[:self._tag_len]
-        return cipher, tag
+        return cipher,tag
     
     #authencicated decryption function
     def decrypt_gcm(self, cp: bytes, tag: bytes):
@@ -173,10 +173,15 @@ IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
 #msg = b''
-img = Image.open('lena_img.jpg')
+img = Image.open('non_Dicom_image.jpg')
 msg = img.tobytes()
+
 gcm = GCMmode(key, IV, A, tag_len)
 
 cptext, tag = gcm.encrypt_gcm(msg)
 #print(cptext)
-print(len(msg), len(cptext))
+pt = gcm.decrypt_gcm(cptext,tag)
+print(pt)
+img_copy = Image.frombytes(img.mode, img.size, pt)
+img_copy.save('gcm_image_copy.jpg')
+print(msg == pt)
