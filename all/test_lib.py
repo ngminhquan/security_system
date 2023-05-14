@@ -2,18 +2,6 @@ import struct
 from aes import long_to_bytes, bytes_to_long
 from binascii import hexlify, unhexlify
 
-BLOCK_SIZE = 16
-KEY_SIZE = 0
-MAXKC = 256 // 32
-MAXKB = 256 // 8
-MAXNR = 14
-
-class BlockState:
-    def __init__(self):
-        self.ek = [0] * (4 * (MAXNR + 1))
-        self.dk = [0] * (4 * (MAXNR + 1))
-        self.rounds = 0
-
 
 Te0 =[
     0xc66363a5 , 0xf87c7c84 , 0xee777799 , 0xf67b7b8d ,
@@ -720,6 +708,8 @@ def keySetupDec(cipherKey):
     Nr = 10
     i = 0
     j = Nr * 4
+
+    #invert order of roundkey
     while i < j:
         rk[i], rk[j] = rk[j], rk[i]
         rk[i + 1], rk[j + 1] = rk[j + 1], rk[i + 1]
@@ -730,28 +720,28 @@ def keySetupDec(cipherKey):
         j -= 4
     
     #apply mixcolumn for all round key but the first and last
-    r = 0
+    r = 4
     for i in range(1, Nr):
         rk[r] =                                         \
-            Td0[Te4[(rk[0] >> 24)       ] & 0xff] ^     \
-            Td1[Te4[(rk[0] >> 16) & 0xff] & 0xff] ^     \
-            Td2[Te4[(rk[0] >>  8) & 0xff] & 0xff] ^     \
-            Td3[Te4[(rk[0]      ) & 0xff] & 0xff]
+            Td0[Te4[(rk[r] >> 24)       ] & 0xff] ^     \
+            Td1[Te4[(rk[r] >> 16) & 0xff] & 0xff] ^     \
+            Td2[Te4[(rk[r] >>  8) & 0xff] & 0xff] ^     \
+            Td3[Te4[(rk[r]      ) & 0xff] & 0xff]
         rk[r + 1] =                                     \
-            Td0[Te4[(rk[1] >> 24)       ] & 0xff] ^     \
-            Td1[Te4[(rk[1] >> 16) & 0xff] & 0xff] ^     \
-            Td2[Te4[(rk[1] >>  8) & 0xff] & 0xff] ^     \
-            Td3[Te4[(rk[1]      ) & 0xff] & 0xff]    
+            Td0[Te4[(rk[r + 1] >> 24)       ] & 0xff] ^     \
+            Td1[Te4[(rk[r + 1] >> 16) & 0xff] & 0xff] ^     \
+            Td2[Te4[(rk[r + 1] >>  8) & 0xff] & 0xff] ^     \
+            Td3[Te4[(rk[r + 1]      ) & 0xff] & 0xff]    
         rk[r + 2] =                                     \
-            Td0[Te4[(rk[2] >> 24)       ] & 0xff] ^     \
-            Td1[Te4[(rk[2] >> 16) & 0xff] & 0xff] ^     \
-            Td2[Te4[(rk[2] >>  8) & 0xff] & 0xff] ^     \
-            Td3[Te4[(rk[2]      ) & 0xff] & 0xff]
+            Td0[Te4[(rk[r + 2] >> 24)       ] & 0xff] ^     \
+            Td1[Te4[(rk[r + 2] >> 16) & 0xff] & 0xff] ^     \
+            Td2[Te4[(rk[r + 2] >>  8) & 0xff] & 0xff] ^     \
+            Td3[Te4[(rk[r + 2]      ) & 0xff] & 0xff]
         rk[r + 3] =                                         \
-            Td0[Te4[(rk[3] >> 24)       ] & 0xff] ^     \
-            Td1[Te4[(rk[3] >> 16) & 0xff] & 0xff] ^     \
-            Td2[Te4[(rk[3] >>  8) & 0xff] & 0xff] ^     \
-            Td3[Te4[(rk[3]      ) & 0xff] & 0xff]
+            Td0[Te4[(rk[r + 3] >> 24)       ] & 0xff] ^     \
+            Td1[Te4[(rk[r + 3] >> 16) & 0xff] & 0xff] ^     \
+            Td2[Te4[(rk[r + 3] >>  8) & 0xff] & 0xff] ^     \
+            Td3[Te4[(rk[r + 3]      ) & 0xff] & 0xff]
         
         r += 4
     return rk
@@ -762,33 +752,19 @@ def encrypt(plaintext):
     s1 = struct.unpack('>I', plaintext[4:8])[0] ^ rk[1]
     s2 = struct.unpack('>I', plaintext[8:12])[0] ^ rk[2]
     s3 = struct.unpack('>I', plaintext[12:16])[0] ^ rk[3]
-    print(hex(s0)[2:])
-    print(hex(s1)[2:])
-    print(hex(s2)[2:])
-    print(hex(s3)[2:])
-    print('\n')
+   
     #round 1: 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[ 4]
     t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[ 5]
     t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[ 6]
     t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[ 7]
 
-    print(hex(t0)[2:])
-    print(hex(t1)[2:])
-    print(hex(t2)[2:])
-    print(hex(t3)[2:])
-    print('\n')
     #round 2: 
     s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[ 8]
     s1 = Te0[t1 >> 24] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >>  8) & 0xff] ^ Te3[t0 & 0xff] ^ rk[ 9]
     s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[10]
     s3 = Te0[t3 >> 24] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >>  8) & 0xff] ^ Te3[t2 & 0xff] ^ rk[11]
 
-    print(hex(s0)[2:])
-    print(hex(s1)[2:])
-    print(hex(s2)[2:])
-    print(hex(s3)[2:])
-    print('\n')
     
     #round 3: 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[12]
@@ -796,11 +772,6 @@ def encrypt(plaintext):
     t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[14]
     t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[15]
     
-    print(hex(t0)[2:])
-    print(hex(t1)[2:])
-    print(hex(t2)[2:])
-    print(hex(t3)[2:])
-    print('\n')
 
     #round 4: 
     s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[16]
@@ -808,68 +779,38 @@ def encrypt(plaintext):
     s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[18]
     s3 = Te0[t3 >> 24] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >>  8) & 0xff] ^ Te3[t2 & 0xff] ^ rk[19]
 
-    print(hex(s0)[2:])
-    print(hex(s1)[2:])
-    print(hex(s2)[2:])
-    print(hex(s3)[2:])
-    print('\n')
-    
     
     #round 5: 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[20]
     t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[21]
     t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[22]
     t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[23]
-    print(hex(t0)[2:])
-    print(hex(t1)[2:])
-    print(hex(t2)[2:])
-    print(hex(t3)[2:])
-    print('\n')
     
     #round 6: 
     s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[24]
     s1 = Te0[t1 >> 24] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >>  8) & 0xff] ^ Te3[t0 & 0xff] ^ rk[25]
     s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[26]
     s3 = Te0[t3 >> 24] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >>  8) & 0xff] ^ Te3[t2 & 0xff] ^ rk[27]
-    print(hex(s0)[2:])
-    print(hex(s1)[2:])
-    print(hex(s2)[2:])
-    print(hex(s3)[2:])
-    print('\n')
     
     #round 7: 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[28]
     t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[29]
     t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[30]
     t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[31]
-    print(hex(t0)[2:])
-    print(hex(t1)[2:])
-    print(hex(t2)[2:])
-    print(hex(t3)[2:])
-    print('\n')
+
     
     #round 8: 
     s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[32]
     s1 = Te0[t1 >> 24] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >>  8) & 0xff] ^ Te3[t0 & 0xff] ^ rk[33]
     s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[34]
     s3 = Te0[t3 >> 24] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >>  8) & 0xff] ^ Te3[t2 & 0xff] ^ rk[35]
-    print(hex(s0)[2:])
-    print(hex(s1)[2:])
-    print(hex(s2)[2:])
-    print(hex(s3)[2:])
-    print('\n')
     
     #round 9: 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[36]
     t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[37]
     t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[38]
     t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[39]
-    print(hex(t0)[2:])
-    print(hex(t1)[2:])
-    print(hex(t2)[2:])
-    print(hex(t3)[2:])
-    print('\n')
-    
+
     #apply last round
     ct = [0] * 16
     s0 = (
@@ -923,12 +864,119 @@ def encrypt(plaintext):
     
     return bytes(ct)
 
+
+def decrypt(ciphertext):
+    s0 = struct.unpack('>I', ciphertext[0:4])[0] ^ rk[0]
+    s1 = struct.unpack('>I', ciphertext[4:8])[0] ^ rk[1]
+    s2 = struct.unpack('>I', ciphertext[8:12])[0] ^ rk[2]
+    s3 = struct.unpack('>I', ciphertext[12:16])[0] ^ rk[3]
+    
+    # round 1: 
+    t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >>  8) & 0xff] ^ Td3[s1 & 0xff] ^ rk[ 4]
+    t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >>  8) & 0xff] ^ Td3[s2 & 0xff] ^ rk[ 5]
+    t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[ 6]
+    t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[ 7]
+    
+    
+    # round 2: 
+    s0 = Td0[t0 >> 24] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >>  8) & 0xff] ^ Td3[t1 & 0xff] ^ rk[ 8]
+    s1 = Td0[t1 >> 24] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >>  8) & 0xff] ^ Td3[t2 & 0xff] ^ rk[ 9]
+    s2 = Td0[t2 >> 24] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >>  8) & 0xff] ^ Td3[t3 & 0xff] ^ rk[10]
+    s3 = Td0[t3 >> 24] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >>  8) & 0xff] ^ Td3[t0 & 0xff] ^ rk[11]
+    # round 3: 
+    t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >>  8) & 0xff] ^ Td3[s1 & 0xff] ^ rk[12]
+    t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >>  8) & 0xff] ^ Td3[s2 & 0xff] ^ rk[13]
+    t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[14]
+    t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[15]
+    # round 4: 
+    s0 = Td0[t0 >> 24] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >>  8) & 0xff] ^ Td3[t1 & 0xff] ^ rk[16]
+    s1 = Td0[t1 >> 24] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >>  8) & 0xff] ^ Td3[t2 & 0xff] ^ rk[17]
+    s2 = Td0[t2 >> 24] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >>  8) & 0xff] ^ Td3[t3 & 0xff] ^ rk[18]
+    s3 = Td0[t3 >> 24] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >>  8) & 0xff] ^ Td3[t0 & 0xff] ^ rk[19]
+    # round 5: 
+    t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >>  8) & 0xff] ^ Td3[s1 & 0xff] ^ rk[20]
+    t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >>  8) & 0xff] ^ Td3[s2 & 0xff] ^ rk[21]
+    t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[22]
+    t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[23]
+    # round 6: 
+    s0 = Td0[t0 >> 24] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >>  8) & 0xff] ^ Td3[t1 & 0xff] ^ rk[24]
+    s1 = Td0[t1 >> 24] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >>  8) & 0xff] ^ Td3[t2 & 0xff] ^ rk[25]
+    s2 = Td0[t2 >> 24] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >>  8) & 0xff] ^ Td3[t3 & 0xff] ^ rk[26]
+    s3 = Td0[t3 >> 24] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >>  8) & 0xff] ^ Td3[t0 & 0xff] ^ rk[27]
+    # round 7: 
+    t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >>  8) & 0xff] ^ Td3[s1 & 0xff] ^ rk[28]
+    t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >>  8) & 0xff] ^ Td3[s2 & 0xff] ^ rk[29]
+    t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[30]
+    t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[31]
+    # round 8: 
+    s0 = Td0[t0 >> 24] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >>  8) & 0xff] ^ Td3[t1 & 0xff] ^ rk[32]
+    s1 = Td0[t1 >> 24] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >>  8) & 0xff] ^ Td3[t2 & 0xff] ^ rk[33]
+    s2 = Td0[t2 >> 24] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >>  8) & 0xff] ^ Td3[t3 & 0xff] ^ rk[34]
+    s3 = Td0[t3 >> 24] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >>  8) & 0xff] ^ Td3[t0 & 0xff] ^ rk[35]
+    # round 9: 
+    t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >>  8) & 0xff] ^ Td3[s1 & 0xff] ^ rk[36]
+    t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >>  8) & 0xff] ^ Td3[s2 & 0xff] ^ rk[37]
+    t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[38]
+    t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[39]
+    
+    #apply last round and
+    pt = [0] * 16
+    s0 =                                            \
+        (Td4[(t0 >> 24)       ] & 0xff000000) ^     \
+        (Td4[(t3 >> 16) & 0xff] & 0x00ff0000) ^     \
+        (Td4[(t2 >>  8) & 0xff] & 0x0000ff00) ^     \
+        (Td4[(t1      ) & 0xff] & 0x000000ff) ^     \
+        rk[40]
+    pt[0] = (s0 >> 24) & 0xff
+    pt[1] = (s0 >> 16) & 0xff
+    pt[2] = (s0 >> 8) & 0xff
+    pt[3] = s0 & 0xff
+
+    s1 =                                            \
+        (Td4[(t1 >> 24)       ] & 0xff000000) ^     \
+        (Td4[(t0 >> 16) & 0xff] & 0x00ff0000) ^     \
+        (Td4[(t3 >>  8) & 0xff] & 0x0000ff00) ^     \
+        (Td4[(t2      ) & 0xff] & 0x000000ff) ^     \
+        rk[41]
+    pt[4] = (s1 >> 24) & 0xff
+    pt[5] = (s1 >> 16) & 0xff
+    pt[6] = (s1 >> 8) & 0xff
+    pt[7] = s1 & 0xff
+
+    s2 =                                            \
+        (Td4[(t2 >> 24)       ] & 0xff000000) ^     \
+        (Td4[(t1 >> 16) & 0xff] & 0x00ff0000) ^     \
+        (Td4[(t0 >>  8) & 0xff] & 0x0000ff00) ^     \
+        (Td4[(t3      ) & 0xff] & 0x000000ff) ^     \
+        rk[42]
+    pt[8] = (s2 >> 24) & 0xff
+    pt[9] = (s2 >> 16) & 0xff
+    pt[10] = (s2 >> 8) & 0xff
+    pt[11] = s2 & 0xff
+
+    s3 =                                            \
+        (Td4[(t3 >> 24)       ] & 0xff000000) ^     \
+        (Td4[(t2 >> 16) & 0xff] & 0x00ff0000) ^     \
+        (Td4[(t1 >>  8) & 0xff] & 0x0000ff00) ^     \
+        (Td4[(t0      ) & 0xff] & 0x000000ff) ^     \
+        rk[43]
+    pt[12] = (s3 >> 24) & 0xff
+    pt[13] = (s3 >> 16) & 0xff
+    pt[14] = (s3 >> 8) & 0xff
+    pt[15] = s3 & 0xff
+    return bytes(pt)
+
+
 mkey = long_to_bytes(0x0f1571c947d9e8590cb7add6af7f6798)
 rk = keySetupEnc(mkey)
 
 pt = long_to_bytes(0x0123456789abcdeffedcba9876543210)
 cp = encrypt(pt)
-print(hexlify(cp))
+
+rk = keySetupDec(mkey)
+cp = long_to_bytes(0xff0b844a0853bf7c6934ab4364148fb9)
+pt = decrypt(cp)
+print(hexlify(pt))
 '''
 import time
 count = 1000

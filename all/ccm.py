@@ -1,5 +1,4 @@
-
-from aes import AES, long_to_bytes, bytes_to_long, _copy_bytes
+from aes import long_to_bytes, bytes_to_long, keySetupDec, keySetupEnc, encrypt, decrypt
 from binascii import hexlify, unhexlify
 import struct
 from PIL import Image
@@ -74,6 +73,8 @@ class CCMmode(object):
         #none and associated data for cipher instance
         self._mac_len: int = mac_len
         self._assoc_len: int = len(assoc)
+        self.rk_enc = keySetupEnc(key)
+        self.rk_dec = keySetupDec(key)
 
         #block size value
         if self._block_size != 16:
@@ -107,12 +108,10 @@ class CCMmode(object):
 
     #aes encrypt & decrypt, use in cmac
     def _aes_encrypt(self, block: bytes) -> bytes:
-        key = AES(self._key)
-        return key.encrypt(block)
+        return encrypt(block)
 
     def _aes_decrypt(self, block: bytes) -> bytes:
-        key = AES(self._key)
-        return key.decrypt(block)
+        return decrypt(block)
 
     #CTR cipher, by formatting the counter (A.3)
     #ctr = len(msg) || nonce || counter
@@ -280,7 +279,7 @@ print(s_u/(255*len(index1_u)))
 
 ''''''
 #test
-'''
+
 key = b'128bit keylength'
 
 
@@ -292,7 +291,7 @@ img = Image.open('non_Dicom_image.jpg')
 msg1 = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
 
-'''
+
 
 """
 pt, _ = ccm.verify(cp)
@@ -303,8 +302,8 @@ img_copy = Image.frombytes(img.mode, img.size, pt)
 img_copy.save('image_copy.jpg')
 """
 #cp1 = ccm.encrypt(msg1)
-'''
-count = 1000
+
+count = 50
 avg = 0
 for i in range(count):
     start_time = time.time()
@@ -321,4 +320,3 @@ for i in range(count):
 
 avg /= count
 print("Thời gian chạy: {:.5f} giây".format(avg))
-'''
