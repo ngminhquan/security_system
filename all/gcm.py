@@ -3,7 +3,7 @@ import struct
 import binascii
 import math
 from PIL import Image
-
+import time
 
 
 #input data
@@ -166,7 +166,17 @@ pt = gcm.decrypt_gcm(cptext, tag)
 print('pt: ', pt)
 '''
 
-key = b'sixteen bit key.'
+
+
+
+
+
+
+
+
+'''
+key = b'128bit keylength'
+
 IV = b'12byte nonce'
 A = b'hello'
 tag_len = 16
@@ -179,7 +189,29 @@ gcm = GCMmode(key, IV, A, tag_len)
 cptext, tag = gcm.encrypt_gcm(msg)
 #print(cptext)
 pt = gcm.decrypt_gcm(cptext,tag)
-print(pt)
+
 img_copy = Image.frombytes(img.mode, img.size, pt)
 img_copy.save('gcm_image_copy.jpg')
-print(msg == pt)
+'''
+
+'''
+count = 1000
+avg = 0
+for i in range(count):
+    start_time = time.time()
+
+    # Đoạn code cần đo thời gian thực thi
+    #cptext, tag = gcm.encrypt_gcm(msg)
+    pt = gcm.decrypt_gcm(cptext,tag)
+
+
+
+
+    end_time = time.time()
+
+    duration = end_time - start_time
+    avg += duration
+
+avg /= count
+print("Thời gian chạy: {:.5f} giây".format(avg))
+'''

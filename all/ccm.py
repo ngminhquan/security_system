@@ -280,11 +280,9 @@ print(s_u/(255*len(index1_u)))
 
 ''''''
 #test
+'''
+key = b'128bit keylength'
 
-sk = key_exchange(puA, puB, prA, prB, nA, nB)
-ssk = b'minhquan'
-
-key = ssk
 
 nonce = unhexlify('101112131415161718191a1b')
 mac_len = 16
@@ -294,7 +292,7 @@ img = Image.open('non_Dicom_image.jpg')
 msg1 = img.tobytes()
 ccm = CCMmode(key, nonce, assoc, mac_len)
 
-
+'''
 
 """
 pt, _ = ccm.verify(cp)
@@ -304,19 +302,16 @@ img_copy = Image.frombytes(img.mode, img.size, pt)
 # Save the copy to a new file
 img_copy.save('image_copy.jpg')
 """
-
-
-count = 20
+#cp1 = ccm.encrypt(msg1)
+'''
+count = 1000
 avg = 0
 for i in range(count):
     start_time = time.time()
 
     # Đoạn code cần đo thời gian thực thi
-    encr = sk.encrypt_key(ssk)
-    decr = sk.decrypt_key(encr)
-
     cp1 = ccm.encrypt(msg1)
-    pt = ccm.verify(cp1)
+    #pt = ccm.verify(cp1)
 
 
     end_time = time.time()
@@ -326,3 +321,4 @@ for i in range(count):
 
 avg /= count
 print("Thời gian chạy: {:.5f} giây".format(avg))
+'''

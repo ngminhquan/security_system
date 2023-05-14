@@ -2,7 +2,6 @@ import struct
 import binascii
 import sha256
 import rsa_algorithm as rsa
-import time
 
 #Cặp khóa của CA (dùng để kí, giải mã cert)
 
@@ -59,22 +58,4 @@ m = b'minhquan'
 cpt = a.signing(m)
 with open('cert.txt','w',encoding='utf-8') as cert :
     cert.write(str(cpt))
-
-
-
-count = 10
-avg = 0
-for i in range(count):
-    start_time = time.time()
-
-    # Đoạn code cần đo thời gian thực thi
-    cpt = a.signing(m)
-
-    end_time = time.time()
-
-    duration = end_time - start_time
-    avg += duration
-
-avg /= count
-print("Thời gian chạy: {:.5f} giây".format(avg))
 
